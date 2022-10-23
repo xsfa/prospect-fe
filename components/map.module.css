@@ -1,0 +1,9 @@
+.popup {
+    max-width: 200px;
+  }
+.map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%
+  }
