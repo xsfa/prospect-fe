@@ -45,7 +45,7 @@ function EventBox(eventData: EventData) {
           <Typography variant="body2" align="left">{eventData.time.toLocaleTimeString("en-US", { options })}</Typography>
           <Typography variant="body1" align="left">People Attending: {eventData.partySize}</Typography>
         </CardContent>
-      </CardActionArea></>
+      </CardActionArea>
     </Card>
   );
 }
