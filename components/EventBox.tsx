@@ -17,7 +17,8 @@ interface EventData {
   profile: Profile,
   partySize: number,
   time: Date,
-  location: Location
+  end: Date,
+  location: string
 }
 
 
@@ -42,9 +43,12 @@ function EventBox(eventData: EventData) {
               </Grid>
               <Grid item xs={8}>
                 <Typography variant="body2" align="left" sx={{width: "100%"}}>{eventData.time.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</Typography>
+                <Typography variant="body2" align="left" sx={{width: "100%"}}>to</Typography>
+                <Typography variant="body2" align="left" sx={{width: "100%"}}>{eventData.end.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</Typography>
+                <Typography variant="body2" align="left" sx={{width: "100%"}}>@ {eventData.location}</Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography variant="body1" align="left" sx={{width: "100%"}}>People Attending: {eventData.partySize}</Typography>
+                {/* <Typography variant="body1" align="left" sx={{width: "100%"}}>People Attending: {eventData.partySize}</Typography> */}
               </Grid>
             </Grid>
           </AccordionSummary>

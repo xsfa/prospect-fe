@@ -1,12 +1,14 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import { Button, Modal, TextField, Typography } from '@mui/material';
+import { Button, IconButton, Modal, TextField, Typography } from '@mui/material';
 import { createPortal } from 'react-dom/cjs/react-dom.development';
 import EventBox from './EventBox';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { createClient } from '@supabase/supabase-js';
 import { useEffect } from 'react';
+import AddIcon from '@mui/icons-material/Add';
+import { makeStyles } from "@material-ui/core/styles";
 const { v4: uuidv4 } = require('uuid');
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -24,7 +26,8 @@ interface EventData {
   profile: Profile,
   partySize: number,
   time: Date,
-  location: Location
+  end: Date,
+  location: string
 }
 let eventsData : EventData[] = [{
   title: "Event 1",
@@ -68,6 +71,13 @@ let eventsData : EventData[] = [{
 },
 ]
 
+const useStyles = makeStyles(theme => ({
+  customHoverFocus: {
+    backgroundColor: "#4ebc3b",
+    "&:hover, &.Mui-focusVisible": { backgroundColor: "#4ebc3b" }
+  }
+}));
+
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -83,19 +93,19 @@ const style = {
 // const axios = require('axios');
 
 const createEvents = async (id, title, desc, time_start, time_end, creator, location, longitude, latitude) => {
- if (title.length > 100) {
-     console.log("Title too long")
-     title = "TOO LONG"
- }
- if (desc > 1000) {
-     console.log("Description too long")
-     desc = "TOO LONG"
- }
- if (time_start >= time_end) {
-     console.log("Events ends before start time: invalid time")
-     time_start = '2020-01-01 12:00:00+00'
-     time_end = '2020-12-30 12:00:00+00'
- }
+//  if (title.length > 100) {
+//      console.log("Title too long")
+//      title = "TOO LONG"
+//  }
+//  if (desc > 1000) {
+//      console.log("Description too long")
+//      desc = "TOO LONG"
+//  }
+//  if (time_start >= time_end) {
+//      console.log("Events ends before start time: invalid time")
+//      time_start = '2020-01-01 12:00:00+00'
+//      time_end = '2020-12-30 12:00:00+00'
+//  }
  const { error } = await supabase
  .from('events')
  .insert([{ id: id, title: title, desc: desc, time_start: time_start,
@@ -112,6 +122,7 @@ const createEvents = async (id, title, desc, time_start, time_end, creator, loca
 function EventsContainer() {
   const [features, setFeatures] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const classes = useStyles();
   useEffect(() => {
     if (loading) {
       var events = [];
@@ -136,6 +147,8 @@ function EventsContainer() {
                     var feature_long = event.longitude;
                     var feature_lat = event.latitude;
                     var feature_start = event.time_start;
+                    var feature_end = event.time_end;
+                    var feature_location = event.location;
                     var params = {
                       access_key: 'abad66fce97fab5f5c568c0320ea8fcf',
                       query: `${feature_long},${feature_lat}`
@@ -161,7 +174,8 @@ function EventsContainer() {
                       profile: feature_creator,
                       partySize: 5,
                       time: new Date(feature_start),
-                      location: {}
+                      end: new Date(feature_end),
+                      location: feature_location
                     };
                     featuresTemp.push(feature);
                 }
@@ -176,14 +190,14 @@ function EventsContainer() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [start, setStart] = React.useState<Dayjs | null>(
-    dayjs('2014-08-18T21:11:54'),
+    dayjs(new Date()),
   );
 
   const handleChangeStart = (newStart: Dayjs | null) => {
     setStart(newStart);
   };
   const [end, setEnd] = React.useState<Dayjs | null>(
-    dayjs('2014-08-18T21:11:54'),
+    dayjs(new Date()),
   );
 
   const handleChangeEnd = (newEnd: Dayjs | null) => {
@@ -200,8 +214,8 @@ function EventsContainer() {
     {
       title: "", 
       desc: "", 
-      time_start: toTimestamp(start.toDate()),
-      time_end: toTimestamp(end.toDate()), 
+      time_start: start.toDate(),
+      time_end: end.toDate(), 
       longitude: 0.0, 
       latitude: 0.0
     }
@@ -262,11 +276,24 @@ function EventsContainer() {
             profile={eventData.profile} 
             partySize={eventData.partySize} 
             time={eventData.time} 
+            end={eventData.end}
             location={eventData.location}/> 
           )
         })}
       </Box>
-      <Button onClick={handleOpen}>Open survey</Button>
+      <IconButton 
+      className={classes.customHoverFocus}
+      aria-label="delete"
+      onClick={handleOpen}
+      sx={{
+        position: "absolute",
+        top: '73vh',
+        left: 340,
+      }}
+      >
+        <AddIcon/>
+      </IconButton>
+
       <Modal
         open={open}
         onClose={handleClose}
@@ -275,6 +302,7 @@ function EventsContainer() {
       >
         <Box sx={style}>
           <form onSubmit={handleSubmit}>
+            <Typography variant="h3">Create Event</Typography>
             <TextField
               required
               id="Title"
@@ -282,6 +310,7 @@ function EventsContainer() {
               label="Title"
               defaultValue=""
               onChange={handleInput}
+              sx={{ margin: 2}}
             />
             <TextField
               id="Description"
@@ -289,24 +318,31 @@ function EventsContainer() {
               label="Description"
               defaultValue=""
               onChange={handleInput}
+              sx={{ margin: 2}}
             />
+            <Box sx={{ margin: 2}}>
             <DateTimePicker
               label="Start Time"
               value={start}
               onChange={handleChangeStart}
               renderInput={(params) => <TextField {...params} />}
+              
             />
+            </Box>
+            <Box sx={{ margin: 2}}>
             <DateTimePicker
               label="End Time"
               value={end}
               onChange={handleChangeEnd}
               renderInput={(params) => <TextField {...params} />}
             />
+            </Box>
             <TextField
               
               id="Location"
-              label="Location (Address)"
+              label="Location"
               defaultValue=""
+              sx={{ margin: 2}}
             />
             <TextField
               required
@@ -315,6 +351,7 @@ function EventsContainer() {
               label="Long"
               defaultValue=""
               onChange={handleInput}
+              sx={{ margin: 2}}
             />
             <TextField
               required
@@ -323,13 +360,15 @@ function EventsContainer() {
               label="Lot"
               defaultValue=""
               onChange={handleInput}
+              sx={{ margin: 2}}
             />
             <Button
             type="submit"
             variant="contained"
             color="primary"
+            sx={{ margin: 2}}
           >
-            Subscribe
+            Create Event
           </Button>
           </form>
         </Box>
