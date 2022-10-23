@@ -1,5 +1,6 @@
 .popup {
     max-width: 200px;
+    position: absolute;
   }
 .map {
     position: absolute;

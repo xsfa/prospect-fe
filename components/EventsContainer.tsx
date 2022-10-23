@@ -66,25 +66,33 @@ function EventsContainer(props: EventData[]) {
     <Box
       sx={{
         width: 400,
-        height: '70vh',
+        height: '80vh',
         border: "1px solid black",
-        borderRadius: 8
-        
+        borderRadius: 4,
+        position: "absolute",
+        top: '10vh',
+        left: 20,
+        backgroundColor: "#FFFFFF"
       }}
     >
-      <Typography variant="h2" align="center">Events</Typography>
-      {eventsData.map(eventData => {
-        return (
-        <EventBox 
-          title={eventData.title} 
-          description={eventData.description} 
-          profile={eventData.profile} 
-          partySize={eventData.partySize} 
-          time={eventData.time} 
-          location={eventData.location}/> 
-        )
-      })}
-
+      <Box
+        sx={{
+          height: '80vh',
+          overflow:'scroll'
+        }}
+      >
+        {eventsData.map(eventData => {
+          return (
+          <EventBox 
+            title={eventData.title} 
+            description={eventData.description} 
+            profile={eventData.profile} 
+            partySize={eventData.partySize} 
+            time={eventData.time} 
+            location={eventData.location}/> 
+          )
+        })}
+      </Box>
     </Box>
   );
 }

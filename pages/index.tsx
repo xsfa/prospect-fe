@@ -7,33 +7,28 @@ import { spacing } from '@mui/system'
 
 import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
+import MapBox from '../components/MapBox'
 
 const Home = () => {
   const session = useSession()
   const supabase = useSupabaseClient()
 
   return (
-    
-    <div className="container" style={{ padding: '50px 0 100px 0' }}>
-      {!session ? (
-        <Auth
-          supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
-          theme="dark"
-        />
+    <div>
+      {!session? (
+        <div className="container" style={{ padding: '50px 0 100px 0' }}>
+          <Auth
+            supabaseClient={supabase}
+            appearance={{ theme: ThemeSupa }}
+            theme="dark"
+          />
+        </div>
       ) : (
-      <Grid container spacing={2}>
-        <Grid xs={4}>
-          <EventsContainer></EventsContainer>
-        </Grid>
-        <Grid xs={8}>
-
-        </Grid>
-        <Grid xs={4}>
-        </Grid>
-        <Grid xs={8}>
-        </Grid>
-      </Grid>
+        <>
+        <NavBar></NavBar>
+        <MapBox></MapBox>
+        <EventsContainer></EventsContainer>
+        </>
       )}
     </div>
   )
