@@ -8,7 +8,6 @@ import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 var mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
 
-
 // var curr_lat = 0;
 // var curr_long = 0;
 
@@ -24,13 +23,12 @@ var mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
 // }
 
 // getCoordinates();
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 function MapBox() {
     useEffect(() => {
         mapboxgl.accessToken = 'pk.eyJ1IjoidGVzZmFzIiwiYSI6ImNsOWttbDVkeTA4b200MGxpNG55N3J2ZDcifQ.YA4R-iT5UrhLEURMqILmHg'
 
-        // get events from supabase db
-        const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
         var events = [];
         var features = []
 

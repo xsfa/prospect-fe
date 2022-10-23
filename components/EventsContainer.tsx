@@ -7,6 +7,9 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { createClient } from '@supabase/supabase-js';
 import { useEffect } from 'react';
+const { v4: uuidv4 } = require('uuid');
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 interface Profile {
 
@@ -77,17 +80,41 @@ const style = {
   p: 4,
 };
 
-const axios = require('axios');
+// const axios = require('axios');
+
+const createEvents = async (id, title, desc, time_start, time_end, creator, location, longitude, latitude) => {
+ if (title.length > 100) {
+     console.log("Title too long")
+     title = "TOO LONG"
+ }
+ if (desc > 1000) {
+     console.log("Description too long")
+     desc = "TOO LONG"
+ }
+ if (time_start >= time_end) {
+     console.log("Events ends before start time: invalid time")
+     time_start = '2020-01-01 12:00:00+00'
+     time_end = '2020-12-30 12:00:00+00'
+ }
+ const { error } = await supabase
+ .from('events')
+ .insert([{ id: id, title: title, desc: desc, time_start: time_start,
+      time_end: time_end, creator: creator,
+       location: location, longitude: longitude, latitude: latitude}])
+ 
+ if (error) {
+     console.log(error)
+ } else {
+     console.log("Event successfully created")
+ }
+}
 
 function EventsContainer() {
-  var events = [];
-  var featuresTemp: EventData[] = []
   const [features, setFeatures] = React.useState([]);
-  
+  const [loading, setLoading] = React.useState(true);
   useEffect(() => {
-  
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-    
+    if (loading) {
+      var events = [];
       supabase.from('events')
                 .select('title, desc, creator, location, time_start, time_end, longitude, latitude')
                 .then(({ data, error }) => {
@@ -99,6 +126,7 @@ function EventsContainer() {
                     events.push(data[i]);
                 }
             }).then(() => {
+              var featuresTemp: EventData[] = []
                 for (var i = 0; i < events.length; i++) {
                     var event = events[i];
     
@@ -107,31 +135,43 @@ function EventsContainer() {
                     var feature_creator = event.creator;
                     var feature_long = event.longitude;
                     var feature_lat = event.latitude;
+                    var feature_start = event.time_start;
                     var params = {
                       access_key: 'abad66fce97fab5f5c568c0320ea8fcf',
                       query: `${feature_long},${feature_lat}`
                     }
-                    axios.get('http://api.positionstack.com/v1/reverse', {params})
-                    .then(response => {
-                      var feature: EventData = {
-                        title: feature_title,
-                        description: feature_desc, 
-                        profile: feature_creator,
-                        partySize: 5,
-                        time: new Date(),
-                        location: {response}
-                      };
-                      console.log(response)
-                      featuresTemp.push(feature);
-                    }).catch(error => {
-                      console.log(error);
-                    });
+                    // axios.get('https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=AIzaSyAynkqrmClN-pCo_-GyCvbBot94DD5drOs', {params})
+                    // .then(response => {
+                    //   var feature: EventData = {
+                    //     title: feature_title,
+                    //     description: feature_desc, 
+                    //     profile: feature_creator,
+                    //     partySize: 5,
+                    //     time: new Date(),
+                    //     location: {response}
+                    //   };
+                    //   console.log(response)
+                    //   featuresTemp.push(feature);
+                    // }).catch(error => {
+                    //   console.log(error);
+                    // });
+                    var feature: EventData = {
+                      title: feature_title,
+                      description: feature_desc, 
+                      profile: feature_creator,
+                      partySize: 5,
+                      time: new Date(feature_start),
+                      location: {}
+                    };
+                    featuresTemp.push(feature);
                 }
                 setFeatures(featuresTemp)
+                console.log(featuresTemp);
                 console.log(features);
             });
-          }, []);
-          
+          }
+        }, [loading]);
+  useEffect(() => {setLoading(false) }, [features]);
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -150,7 +190,51 @@ function EventsContainer() {
     setEnd(newEnd);
   };
 
-        
+  const toTimestamp = (strDate) => {
+    var datum = Date.parse(strDate);
+    return datum/1000;
+  }
+
+  const [formInput, setFormInput] = React.useReducer(
+    (state, newState) => ({ ...state, ...newState }),
+    {
+      title: "", 
+      desc: "", 
+      time_start: toTimestamp(start.toDate()),
+      time_end: toTimestamp(end.toDate()), 
+      longitude: 0.0, 
+      latitude: 0.0
+    }
+  );
+
+  const handleInput = evt => {
+    const name = evt.target.name;
+    const newValue = evt.target.value;
+    setFormInput({ [name]: newValue });
+  };
+
+  const handleSubmit = evt => {
+    evt.preventDefault();
+
+    let data = formInput;
+
+    createEvents(uuidv4(), data.title,
+    data.desc, data.time_start, data.time_end, 9521,
+    'Seattle', data.longitude, data.latitude).then(function() {
+      setLoading(true)
+    });
+
+    // fetch("https://pointy-gauge.glitch.me/api/form", {
+    //   method: "POST",
+    //   body: JSON.stringify(data),
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   }
+    // })
+    //   .then(response => response.json())
+    //   .then(response => console.log("Success:", JSON.stringify(response)))
+    //   .catch(error => console.error("Error:", error));
+  };
   return (
     <Box
       sx={{
@@ -190,17 +274,21 @@ function EventsContainer() {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          
+          <form onSubmit={handleSubmit}>
             <TextField
               required
               id="Title"
+              name="title"
               label="Title"
               defaultValue=""
+              onChange={handleInput}
             />
             <TextField
               id="Description"
+              name="desc"
               label="Description"
               defaultValue=""
+              onChange={handleInput}
             />
             <DateTimePicker
               label="Start Time"
@@ -215,11 +303,35 @@ function EventsContainer() {
               renderInput={(params) => <TextField {...params} />}
             />
             <TextField
-              required
+              
               id="Location"
               label="Location (Address)"
               defaultValue=""
             />
+            <TextField
+              required
+              id="Long"
+              name="longitude"
+              label="Long"
+              defaultValue=""
+              onChange={handleInput}
+            />
+            <TextField
+              required
+              id="Lat"
+              name="latitude"
+              label="Lot"
+              defaultValue=""
+              onChange={handleInput}
+            />
+            <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+          >
+            Subscribe
+          </Button>
+          </form>
         </Box>
       </Modal>
     </Box>
