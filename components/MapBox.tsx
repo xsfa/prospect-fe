@@ -4,6 +4,8 @@ import { Typography } from '@mui/material';
 import { createPortal } from 'react-dom/cjs/react-dom.development';
 import { useEffect, useState } from 'react';
 import styles from 'components/map.module.css'
+import { createClient } from '@supabase/supabase-js';
+import { v4 as uuidv4 } from 'uuid';
 var mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
 
 
@@ -27,6 +29,49 @@ function MapBox() {
     useEffect(() => {
         mapboxgl.accessToken = 'pk.eyJ1IjoidGVzZmFzIiwiYSI6ImNsOWttbDVkeTA4b200MGxpNG55N3J2ZDcifQ.YA4R-iT5UrhLEURMqILmHg'
 
+        // get events from supabase db
+        const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+        var events = [];
+        var features = []
+
+
+        supabase.from('events')
+            .select('title, desc, creator, location, time_start, time_end, longitude, latitude')
+            .then(({ data, error }) => {
+            console.log(data);
+            console.log(error);
+            
+            // create array of data
+            for (var i = 0; i < data.length; i++) {
+                events.push(data[i]);
+            }
+        }).then(() => {
+            for (var i = 0; i < events.length; i++) {
+                var event = events[i];
+
+                var feature_title = event.title;
+                var feature_desc = event.desc;
+                var feature_creator = event.creator;
+                var feature_long = event.longitude;
+                var feature_lat = event.latitude;
+
+                var feature = {
+                    'type': 'Feature',
+                    'properties': {
+                        'description': `<strong>${feature_title}</strong><p>${feature_desc}</p>`,
+                        'icon': 'theatre'
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [feature_long, feature_lat]
+                    }
+                };
+
+                features.push(feature);
+            }
+            console.log(features);
+        });
+        
         const map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v11',
@@ -39,21 +84,7 @@ function MapBox() {
                 'type': 'geojson',
                 'data': {
                     'type': 'FeatureCollection',
-                    'features': [
-                        {
-                            'type': 'Feature',
-                            'properties': {
-                                'description':
-                                    '<strong>Dubhacks</strong><p>A fun hackathon be there or be square</p>',
-                                'icon': 'theatre'
-                            },
-                            'geometry': {
-                                'type': 'Point',
-                                'coordinates': [-122.305138, 47.655466]
-                            }
-                        },
-                        
-                    ]
+                    'features': features
                 }
             }).addLayer({
                 'id': 'places',
