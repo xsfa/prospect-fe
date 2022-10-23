@@ -15,7 +15,6 @@ const Home = () => {
   return (
     <Grid container spacing={2}>
         <Grid xs={4}>
-          <EventsContainer></EventsContainer>
         </Grid>
         <Grid xs={8}>
           <Typography>xs=4</Typography>
