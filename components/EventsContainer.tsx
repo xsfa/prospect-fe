@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom/cjs/react-dom.development';
 import EventBox from './EventBox';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs, { Dayjs } from 'dayjs';
+import { createClient } from '@supabase/supabase-js';
+import { useEffect } from 'react';
 
 interface Profile {
 
@@ -75,7 +77,61 @@ const style = {
   p: 4,
 };
 
-function EventsContainer(props: EventData[]) {
+const axios = require('axios');
+
+function EventsContainer() {
+  var events = [];
+  var featuresTemp: EventData[] = []
+  const [features, setFeatures] = React.useState([]);
+  
+  useEffect(() => {
+  
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    
+      supabase.from('events')
+                .select('title, desc, creator, location, time_start, time_end, longitude, latitude')
+                .then(({ data, error }) => {
+                console.log(data);
+                console.log(error);
+                
+                // create array of data
+                for (var i = 0; i < data.length; i++) {
+                    events.push(data[i]);
+                }
+            }).then(() => {
+                for (var i = 0; i < events.length; i++) {
+                    var event = events[i];
+    
+                    var feature_title = event.title;
+                    var feature_desc = event.desc;
+                    var feature_creator = event.creator;
+                    var feature_long = event.longitude;
+                    var feature_lat = event.latitude;
+                    var params = {
+                      access_key: 'abad66fce97fab5f5c568c0320ea8fcf',
+                      query: `${feature_long},${feature_lat}`
+                    }
+                    axios.get('http://api.positionstack.com/v1/reverse', {params})
+                    .then(response => {
+                      var feature: EventData = {
+                        title: feature_title,
+                        description: feature_desc, 
+                        profile: feature_creator,
+                        partySize: 5,
+                        time: new Date(),
+                        location: {response}
+                      };
+                      console.log(response)
+                      featuresTemp.push(feature);
+                    }).catch(error => {
+                      console.log(error);
+                    });
+                }
+                setFeatures(featuresTemp)
+                console.log(features);
+            });
+          }, []);
+          
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -93,6 +149,8 @@ function EventsContainer(props: EventData[]) {
   const handleChangeEnd = (newEnd: Dayjs | null) => {
     setEnd(newEnd);
   };
+
+        
   return (
     <Box
       sx={{
@@ -112,7 +170,7 @@ function EventsContainer(props: EventData[]) {
           overflow:'scroll'
         }}
       >
-        {eventsData.map(eventData => {
+        {features.map(eventData => {
           return (
           <EventBox 
             title={eventData.title} 
