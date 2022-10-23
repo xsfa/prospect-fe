@@ -13,15 +13,7 @@ const Home = () => {
   const supabase = useSupabaseClient()
 
   return (
-    <div className="container" style={{ padding: '50px 0 100px 0' }}>
-      {!session ? (
-        <Auth
-          supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
-          theme="dark"
-        />
-      ) : (
-      <Grid container spacing={2}>
+    <Grid container spacing={2}>
         <Grid xs={4}>
           <EventsContainer></EventsContainer>
         </Grid>
@@ -35,8 +27,30 @@ const Home = () => {
           <Typography>xs=8</Typography>
         </Grid>
       </Grid>
-      )}
-    </div>
+    // <div className="container" style={{ padding: '50px 0 100px 0' }}>
+    //   {!session ? (
+    //     <Auth
+    //       supabaseClient={supabase}
+    //       appearance={{ theme: ThemeSupa }}
+    //       theme="dark"
+    //     />
+    //   ) : (
+    //   <Grid container spacing={2}>
+    //     <Grid xs={4}>
+    //       <EventsContainer></EventsContainer>
+    //     </Grid>
+    //     <Grid xs={8}>
+    //       <Typography>xs=4</Typography>
+    //     </Grid>
+    //     <Grid xs={4}>
+    //       <Typography>xs=4</Typography>
+    //     </Grid>
+    //     <Grid xs={8}>
+    //       <Typography>xs=8</Typography>
+    //     </Grid>
+    //   </Grid>
+    //   )}
+    // </div>
   )
 }
 
