@@ -1,8 +1,10 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import { Typography } from '@mui/material';
+import { Button, Modal, TextField, Typography } from '@mui/material';
 import { createPortal } from 'react-dom/cjs/react-dom.development';
 import EventBox from './EventBox';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import dayjs, { Dayjs } from 'dayjs';
 
 interface Profile {
 
@@ -61,7 +63,36 @@ let eventsData : EventData[] = [{
 },
 ]
 
+const style = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
+
 function EventsContainer(props: EventData[]) {
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [start, setStart] = React.useState<Dayjs | null>(
+    dayjs('2014-08-18T21:11:54'),
+  );
+
+  const handleChangeStart = (newStart: Dayjs | null) => {
+    setStart(newStart);
+  };
+  const [end, setEnd] = React.useState<Dayjs | null>(
+    dayjs('2014-08-18T21:11:54'),
+  );
+
+  const handleChangeEnd = (newEnd: Dayjs | null) => {
+    setEnd(newEnd);
+  };
   return (
     <Box
       sx={{
@@ -93,6 +124,46 @@ function EventsContainer(props: EventData[]) {
           )
         })}
       </Box>
+      <Button onClick={handleOpen}>Open survey</Button>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          
+            <TextField
+              required
+              id="Title"
+              label="Title"
+              defaultValue=""
+            />
+            <TextField
+              id="Description"
+              label="Description"
+              defaultValue=""
+            />
+            <DateTimePicker
+              label="Start Time"
+              value={start}
+              onChange={handleChangeStart}
+              renderInput={(params) => <TextField {...params} />}
+            />
+            <DateTimePicker
+              label="End Time"
+              value={end}
+              onChange={handleChangeEnd}
+              renderInput={(params) => <TextField {...params} />}
+            />
+            <TextField
+              required
+              id="Location"
+              label="Location (Address)"
+              defaultValue=""
+            />
+        </Box>
+      </Modal>
     </Box>
   );
 }

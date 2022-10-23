@@ -8,6 +8,8 @@ import { spacing } from '@mui/system'
 import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import MapBox from '../components/MapBox'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const Home = () => {
   const session = useSession()
@@ -26,8 +28,10 @@ const Home = () => {
       ) : (
         <>
         <NavBar></NavBar>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
         <MapBox></MapBox>
         <EventsContainer></EventsContainer>
+        </LocalizationProvider>
         </>
       )}
     </div>
