@@ -1,6 +1,11 @@
 .popup {
     max-width: 200px;
     position: absolute;
+    top:-28px;
+    background-color: white;
+    padding: 16px;
+    border-radius: 8px; 
+    filter: drop-shadow(5px 5px 5px #c0c0c0);
   }
 .map {
     position: absolute;

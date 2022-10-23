@@ -61,7 +61,8 @@ function MapBox() {
                 'source': 'places',
                 'layout': {
                     'icon-image': '{icon}-15',
-                    'icon-allow-overlap': true
+                    'icon-allow-overlap': true,
+                    'icon-size': 3
                 }
             });
 
