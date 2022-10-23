@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import { Typography } from '@mui/material';
 import { createPortal } from 'react-dom/cjs/react-dom.development';
 import { useEffect, useState } from 'react';
+import styles from 'components/map.module.css'
 var mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
 
 
@@ -33,73 +34,75 @@ function MapBox() {
             zoom: 9
         });
 
-        // map.on('load', function() {
-        //     map.addSource('places', {
-        //         'type': 'geojson',
-        //         'data': {
-        //             'type': 'FeatureCollection',
-        //             'features': [
-        //                 {
-        //                     'type': 'Feature',
-        //                     'properties': {
-        //                         'description':
-        //                             '<strong>Mapbox DC</strong><p>Our DC office is located in the heart of Dupont Circle.</p>',
-        //                         'icon': 'theatre'
-        //                     },
-        //                     'geometry': {
-        //                         'type': 'Point',
-        //                         'coordinates': [-77.031706, 38.914581]
-        //                     }
-        //                 },
+        map.on('load', function() {
+            map.addSource('places', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'properties': {
+                                'description':
+                                    '<strong>Dubhacks</strong><p>A fun hackathon be there or be square</p>',
+                                'icon': 'theatre'
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [-122.305138, 47.655466]
+                            }
+                        },
                         
-        //             ]
-        //         }
-        //     });
-        // });
-        // map.addLayer({
-        //     'id': 'places',
-        //     'type': 'symbol',
-        //     'source': 'places',
-        //     'layout': {
-        //         'icon-image': '{icon}-15',
-        //         'icon-allow-overlap': true
-        //     }
-        // });
+                    ]
+                }
+            }).addLayer({
+                'id': 'places',
+                'type': 'symbol',
+                'source': 'places',
+                'layout': {
+                    'icon-image': '{icon}-15',
+                    'icon-allow-overlap': true
+                }
+            });
 
-        // // When a click event occurs on a feature in the places layer, open a popup at the
-        // // location of the feature, with description HTML from its properties.
-        // map.on('click', 'places', function(e) {
-        //     var coordinates = e.features[0].geometry.coordinates.slice();
-        //     var description = e.features[0].properties.description;
+        // When a click event occurs on a feature in the places layer, open a popup at the
+        // location of the feature, with description HTML from its properties.
+        map.on('click', 'places', function(e) {
+            var coordinates = e.features[0].geometry.coordinates.slice();
+            var description = e.features[0].properties.description;
 
-        //     // Ensure that if the map is zoomed out such that multiple
-        //     // copies of the feature are visible, the popup appears
-        //     // over the copy being pointed to.
-        //     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-        //         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-        //     }
+            // Ensure that if the map is zoomed out such that multiple
+            // copies of the feature are visible, the popup appears
+            // over the copy being pointed to.
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
 
-        //     new mapboxgl.Popup()
-        //         .setLngLat(coordinates)
-        //         .setHTML(description)
-        //         .addTo(map);
-        // });
+            new mapboxgl.Popup( { className : styles.popup })
+                .setLngLat(coordinates)
+                .setHTML(description)
+                .addTo(map)
 
-        // // Change the cursor to a pointer when the mouse is over the places layer.
-        // map.on('mouseenter', 'places', function() {
-        //     map.getCanvas().style.cursor = 'pointer';
-        // });
+            // set popup style
 
-        // // Change it back to a pointer when it leaves.
-        // map.on('mouseleave', 'places', function() {
-        //     map.getCanvas().style.cursor = '';
-        // });
+        });
+
+        // Change the cursor to a pointer when the mouse is over the places layer.
+        map.on('mouseenter', 'places', function() {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to a pointer when it leaves.
+        map.on('mouseleave', 'places', function() {
+            map.getCanvas().style.cursor = '';
+        });
+        });
     }, []);
 
-    // render map
+    // render map absolute
     return (
         <div>
-            <div id="map" style={{ width: '100%', height: '100vh' }}></div>
+            <div id="map" className={styles.map}></div>
         </div>
     );
 }
